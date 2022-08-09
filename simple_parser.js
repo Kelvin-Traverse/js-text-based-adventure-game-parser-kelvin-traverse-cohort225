@@ -1,8 +1,7 @@
 // TODO: add better error handling
 
-// Some constants
+// Constants
 const TT_WORD = ':word:';
-const ARTICLES = 'a|an|the';
 
 // GameObject test class
 class GameObject {
@@ -193,20 +192,12 @@ function tokenizeRule(rule) {
 
 // Function to tokenize the input string.
 function tokenizeInputString(str) {
-
-    // Create a regular expression to match articles i.e. 'a', 'an', and 'the'
-    //     (probably could be made a constant)
-    // NOTE: A cool thing I learned is that, if you put `String.raw` before a string,
-    //     backslashes don't have to be escaped. (it's like r'' in python)
-    const articlesRegEx = RegExp(String.raw`\s+(${ARTICLES})\s+`, 'g');
-
     // Remove whitespace from either end of the string.
     // Make it all lower case.
-    // Remove articles (replace with a space).
     // Replace any run of whitespace characters with a space.
     //     e.g. three spaces in a row become one space.
     // Split the string on spaces.
-    return str.trim().toLowerCase().replace(articlesRegEx, ' ').replace(/\s+/g, ' ').split(' ');
+    return str.trim().toLowerCase().replace(/\s+/g, ' ').split(' ');
 }
 
 // DEBUGGING for `tokenizeInputString`:
