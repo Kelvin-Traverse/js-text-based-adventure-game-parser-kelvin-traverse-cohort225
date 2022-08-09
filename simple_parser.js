@@ -257,6 +257,7 @@ function parseSingle(inputTokens) {
     for (const gameObject of gameObjects) {
         inputTokens.index = startIndex;
         let matchScore = -1;
+        let nounFound = false;
 
         // If the object has a special function to score its own name, call it.
         // (This is not implemented in this program... yet)
@@ -280,14 +281,18 @@ function parseSingle(inputTokens) {
                 else if (gameObject.nouns.includes(inputTokens.currentToken())) {
                     matchScore++;
                     inputTokens.nextToken();
+                    nounFound = true;
                     break;
                 }
                 // If the token is not an adjective or noun of the object, set score to 0 and break.
                 //     (the objects noun was never found)
                 else {
-                    matchScore = 0;
                     break;
                 }
+            }
+
+            if (!nounFound) {
+                matchScore = 0;
             }
         }
 
