@@ -236,6 +236,11 @@ function getGameObjectsFromCurrentRoom() {
 // This function gets passed the TokenList from the parser so the parser can pick up where this function leaves off.
 //     (Pass-by-reference and all that)
 function parseSingle(inputTokens) {
+    // Skip any leading articles.
+    if (['a', 'an', 'the'].includes(inputTokens.currentToken())) {
+        inputTokens.nextToken();
+    }
+
     // Keep track of the starting index in the TokenList to return to when testing each new object.
     const startIndex = inputTokens.index;
 
@@ -313,6 +318,11 @@ function parseSingle(inputTokens) {
 // Determining how this function works is left as an exercise to the reader.
 // i.e. I'm to lazy to comment it, but it basically just tries to match the whole word.
 function parseDanceStyle(inputTokens) {
+    // Skip any leading articles.
+    if (['a', 'an', 'the'].includes(inputTokens.currentToken())) {
+        inputTokens.nextToken();
+    }
+
     const startIndex = inputTokens.index;
     const dances = ['waltz', 'tango', 'funky chicken'];
 
