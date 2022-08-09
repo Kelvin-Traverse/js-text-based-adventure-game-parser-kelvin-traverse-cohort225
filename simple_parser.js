@@ -5,8 +5,16 @@ const TT_WORD = ':word:';
 
 // GameObject test class
 class GameObject {
-    constructor(name) {
-        this.name = name;
+    constructor(nouns, adjectives=[], shortName='') {
+        this.nouns = nouns;
+        this.adjectives = adjectives;
+        this.shortName = shortName;
+    }
+    get name() {
+        if (this.shortName !== '') {
+            return this.shortName;
+        }
+        return this.nouns[0];
     }
 }
 
@@ -80,16 +88,16 @@ const tokenParsingFunctionMap = new Map([
 //     In a real game these functions would have a lot more to them,
 //     but this is just a proof of concept.
 function actionTake(object) {
-    return `You take the ${object.name.join(' ')}`;
+    return `You take the ${object.name}`;
 }
 function actionTakeFrom(object, container) {
-    return `You take the ${object.name.join(' ')} from the ${container.name.join(' ')}`;
+    return `You take the ${object.name} from the ${container.name}`;
 }
 function actionGive(recipient, object) {
-    return `You give the ${object.name.join(' ')} to the ${recipient.name.join(' ')}`;
+    return `You give the ${object.name} to the ${recipient.name}`;
 }
 function actionGiveReversed(object, recipient) {
-    actionGive(recipient, object);
+    return actionGive(recipient, object);
 }
 function actionDance() {
     return 'You flail around wildly. Everyone judges you.';
@@ -98,7 +106,7 @@ function actionDanceWithStyle(style) {
     return `You dance the ${style} very well`;
 }
 function actionPut(object, surface) {
-    return `You put the ${object.name.join(' ')} on the ${surface.name.join(' ')}`;
+    return `You put the ${object.name} on the ${surface.name}`;
 }
 
 // Token class to use when tokenizing rule strings.
@@ -209,21 +217,19 @@ function tokenizeInputString(str) {
 function getGameObjectsFromCurrentRoom() {
     // Make a fake room full of fake things.
     return [
-        new GameObject(['old', 'rusty', 'key']),
-        new GameObject(['old', 'man']),
-        new GameObject(['desk']),
-        new GameObject(['big', 'crate']),
-        new GameObject(['small', 'crate']),
+        new GameObject(['key'], ['rusty', 'old'], 'rusty old key'),
+        new GameObject(['key'], ['shiny', 'new'], 'shiny new key'),
+        new GameObject(['man'], ['old'], 'old man'),
+        new GameObject(['egg'], ['dragon'], 'dragon egg'),
+        new GameObject(['dragon'], ['angry']),
+        new GameObject(['desk'], []),
+        new GameObject(['crate'], ['big'], 'big crate'),
+        new GameObject(['crate'], ['small', 'little'], 'small crate'),
     ];
 }
 
 // Function to call when 'single' symbol is encountered during parsing.
 // The function gives each GameObject a score based on how many words in a row from the input are in the objects name.
-//     The word 'old' will match both 'old rusty key' and 'old man'.
-//     In this function, an object can be inferred from just its adjectives.
-//         e.g. 'old rusty' will be interpreted as the 'old rusty key'
-//     Is this a good way to do it? Maybe not, but it's fast and it works (for some definition of works).
-//     NOTE: I stole the idea for this type of matching from another parser.
 // This function gets passed the TokenList from the parser so the parser can pick up where this function leaves off.
 //     (Pass-by-reference and all that)
 function parseSingle(inputTokens) {
@@ -263,14 +269,25 @@ function parseSingle(inputTokens) {
         if (matchScore === -1) {
             matchScore = 0;
 
-            // For every matching word increase the score until a word doesn't match.
+            // While there are still tokens in the input...
             while (inputTokens.currentToken()) {
-                if (gameObject.name.includes( inputTokens.currentToken())) {
+                // If the token is an adjective of the object, increase score by 1.
+                if (gameObject.adjectives.includes(inputTokens.currentToken())) {
                     matchScore++;
-                } else {
+                    inputTokens.nextToken();
+                }
+                // If the token is an noun of the object, increase score by 1 and break.
+                else if (gameObject.nouns.includes(inputTokens.currentToken())) {
+                    matchScore++;
+                    inputTokens.nextToken();
                     break;
                 }
-                inputTokens.nextToken();
+                // If the token is not an adjective or noun of the object, set score to 0 and break.
+                //     (the objects noun was never found)
+                else {
+                    matchScore = 0;
+                    break;
+                }
             }
         }
 
