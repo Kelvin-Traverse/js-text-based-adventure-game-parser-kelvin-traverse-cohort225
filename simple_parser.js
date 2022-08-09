@@ -1,5 +1,4 @@
 // TODO: add better error handling
-// TODO: rename 'noun' to 'single' as in a single object
 
 // Some constants
 const TT_WORD = ':word:';
@@ -42,18 +41,18 @@ class Verb {
 const verbs = [
     // Give ...
     new Verb(['give'], new Map([
-        // Note in the rule below that 'noun' is not quoted.
-        // The parser will attempt to find a 'noun' in the input using a specified parsing function.
+        // Note in the rule below that 'single' is not quoted.
+        // The parser will attempt to find a 'single' in the input using a specified parsing function.
         //     (see `tokenParsingFunctionMap` defined after the verbs list)
-        ['noun noun', actionGive],
+        ['single single', actionGive],
         // Note in the rule below that 'to' is quoted.
         // The parser will look for the literal word "to".
-        ['noun "to" noun', actionGiveReversed],
+        ['single "to" single', actionGiveReversed],
     ])),
     // Pick up ...
     new Verb(['pick'], new Map([
-        ['"up" noun', actionTake],
-        ['"up" noun "on" noun', actionTakeFrom],
+        ['"up" single', actionTake],
+        ['"up" single "on" single', actionTakeFrom],
     ])),
     // Dance (why not?)
     new Verb(['dance'], new Map([
@@ -62,18 +61,18 @@ const verbs = [
     ])),
     // Put / Place ...
     new Verb(['put', 'place'], new Map([
-        ['noun "on" noun', actionPut],
+        ['single "on" single', actionPut],
     ])),
     // Gain possession of
     new Verb(['gain'], new Map([
-        ['"possession of" noun', actionTake],
+        ['"possession of" single', actionTake],
     ])),
 ]
 
 // Functions to use when non-literal symbols are encountered.
 //     (these parsing functions are defined later in the program)
 const tokenParsingFunctionMap = new Map([
-    ['noun', parseNoun],
+    ['single', parseSingle],
     ['dance_style', parseDanceStyle], // (see rules for the 'dance' verb above)
 ]);
 
@@ -172,7 +171,7 @@ function tokenizeRule(rule) {
     //     e.g. {type: TT_WORD, value: 'to'}
     //
     // Everything else gets the type equal to itself and a null value.
-    //     e.g. {type: 'noun', value: null}
+    //     e.g. {type: 'single', value: null}
     for (const part of ruleParts) {
         if (part[0] === '"') {
             const words = part.match(/[a-z]+/g);
@@ -188,8 +187,8 @@ function tokenizeRule(rule) {
 }
 
 // DEBUGGING for `tokenizeRule`:
-//console.log(tokenizeRule('"up" noun'));
-//console.log(tokenizeRule('"up" noun "on" noun'));
+//console.log(tokenizeRule('"up" single'));
+//console.log(tokenizeRule('"up" single "on" single'));
 
 
 // Function to tokenize the input string.
@@ -215,7 +214,7 @@ function tokenizeInputString(str) {
 //console.log(tokenizeInputString('pick up small key on desk'));
 
 
-// Fake a room for the `parseNoun` function to use
+// Fake a room for the `parseSingle` function to use
 function getGameObjectsFromCurrentRoom() {
     // Make a fake room full of fake things.
     return [
@@ -227,7 +226,7 @@ function getGameObjectsFromCurrentRoom() {
     ];
 }
 
-// Function to call when 'noun' symbol is encountered during parsing.
+// Function to call when 'single' symbol is encountered during parsing.
 // The function gives each GameObject a score based on how many words in a row from the input are in the objects name.
 //     The word 'old' will match both 'old rusty key' and 'old man'.
 //     In this function, an object can be inferred from just its adjectives.
@@ -236,7 +235,7 @@ function getGameObjectsFromCurrentRoom() {
 //     NOTE: I stole the idea for this type of matching from another parser.
 // This function gets passed the TokenList from the parser so the parser can pick up where this function leaves off.
 //     (Pass-by-reference and all that)
-function parseNoun(inputTokens) {
+function parseSingle(inputTokens) {
     // Keep track of the starting index in the TokenList to return to when testing each new object.
     const startIndex = inputTokens.index;
 
