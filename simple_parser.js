@@ -447,7 +447,7 @@ function parse(str) {
                 }
 
                 // If the end of both TokenLists has been reached, the rule matched. (I think)
-                if (ruleTokens.lookAhead() === null && inputTokens.currentToken() === null) {
+                if (ruleTokens.currentToken() === null && inputTokens.currentToken() === null) {
 
                     console.log('\tGood rule found:', ruleAction[0]);
 
